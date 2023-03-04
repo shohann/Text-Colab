@@ -13,13 +13,54 @@
     <input id="message" type="text">
     <button id="send">Send Message</button>
 
+    <br>
+    <br>
+    <br>
+
+    <button id="create" >Create</button>
+    <br>
+    <br>
+    <input type="text" name="room-code" id="room-code">
+    <button id="join" >Join</button>
+    <br>
+    <br>
+    <button id="leave">Leave</button>
 
 </body>
 </html>
 
 <script>
     const url = `ws://localhost:3001`;
-    const server = new WebSocket(url);
+    const server = new WebSocket(url); //websocket server
+
+    ////////////////////////Other/////
+    const createButton = document.getElementById('create');
+    const joinButton = document.getElementById('join');
+    const leaveButton = document.getElementById('leave');
+
+    createButton.addEventListener('click', function (e) {
+        server.send('{ "type": "create" }');
+        // console.log('created');
+    });
+
+    joinButton.addEventListener('click', function (e) {
+        const code = document.getElementById("room-code").value;
+        const obj = { "type": "join" , "params": { "code": code }}
+        server.send(JSON.stringify(obj));
+        // console.log('joined');
+        
+    });
+
+    leaveButton.addEventListener('click', function (e) {
+        server.send('{ "type": "leave" }');
+        console.log('leave');
+    });
+
+
+
+
+
+    /////////////////////////////////
 
     const message = document.getElementById('messages');
     const input = document.getElementById('message');
@@ -34,7 +75,8 @@
 
     server.onmessage = function(event) {
         const { data } = event;
-        generateMessageEntry(data, 'Server');
+        console.log(JSON.parse(data));
+        // generateMessageEntry(data, 'Server');
 
     }
 
