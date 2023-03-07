@@ -70,7 +70,7 @@
         const obj = { type: "write" , 
                       params: { 
                                 txt: txtInput.value,
-                                roomId: room
+                                room: room
                               }
                     };
         server.send(JSON.stringify(obj));
@@ -101,10 +101,10 @@
         const { data } = event;
         const parsedData = JSON.parse(data);
 
-        
+        console.log(parsedData);
         if (parsedData.params.room) {
-            console.log('create');
-            console.log(parsedData.params.room);
+            
+            console.log(parsedData.params);
             roomId.innerText = `RoomId:${parsedData.params.room}`
         } else {
             console.log(parsedData);

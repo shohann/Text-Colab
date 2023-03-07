@@ -64,7 +64,6 @@ function join(params, ws) {
 
   rooms[room].push(ws);
   ws["room"] = room;
-  console.log(rooms);
 
   generalInformation(ws);
 }
@@ -95,8 +94,16 @@ function generalInformation(ws) {
   ws.send(JSON.stringify(obj));
 }
 
+function broadcast(data, room, ws) {
+  wss.clients.forEach(client => {
+    if (client.readyState === WebSocket.OPEN && client !== ws && client.room === room) {
+      client.send(JSON.stringify(data));
+    }
+  }) 
+}
+
 wss.on('connection', function(ws) {
-  console.log(wss.clients.size);
+    console.log(wss.clients.size);
     ws.on('message', function(data) {
 
         const obj = JSON.parse(data.toString());
@@ -110,13 +117,21 @@ wss.on('connection', function(ws) {
             console.log('joined');
             join(params, ws);
         } else if (type === 'write') {
-            console.log('Write start');
-            console.log(params);
-            const ans = { txt: params.txt }
-            txtDB[0].txt = params.txt;
-            console.log(txtDB);
-            console.log('Write ENd');
-            ws.send(JSON.stringify(ans))
+            const roomId = params.room;
+            const inputTxt = params.txt;
+            const txtDBIndex = txtDB.findIndex((el) => roomId === el.roomId);
+            console.log(`OLD: ${txtDB[txtDBIndex].txt}`);
+            txtDB[txtDBIndex].txt = inputTxt;
+            console.log(`New: ${txtDB[txtDBIndex].txt}`);
+
+            broadcast(txtDB[txtDBIndex].txt, roomId)
+            // ws.send(JSON.stringify({
+            //   type: 'info',
+            //   params: {
+            //     roomId: params.room,
+            //     txt: txtDB[txtDBIndex].txt
+            //   }
+            // }));
         } else {
               console.log('invalid');
               leave(params, ws) // why?
