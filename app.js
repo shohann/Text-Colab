@@ -22,6 +22,7 @@ const wss =  new WebSocket.Server({
 
 const maxClients = 5;
 let rooms = {};
+let txtDB = [];
 
 function genKey(length) {
     let result = '';
@@ -34,23 +35,23 @@ function genKey(length) {
 }
 
 function create(params, ws) {
-  // console.log(params);
   const room = genKey(5);
   console.log(`roomID: ${room}`);
   rooms[room] = [ws];
+
   ws["room"] = room;
+  txtDB.push({
+    roomId: room,
+    txt: ''
+  })
   
-  
-  // console.log(rooms);
-  // console.log(wss.client.room);
+  console.log(txtDB);
+  // console.log(ws);
   generalInformation(ws);
 }
 
 function join(params, ws) {
-  // console.log(params);
   const room = params.code;
-  // console.log(room);
-  // console.log(rooms);
   if (!Object.keys(rooms).includes(room)) {
     console.warn(`Room ${room} does not exist!`);
     return;
@@ -62,11 +63,7 @@ function join(params, ws) {
   }
 
   rooms[room].push(ws);
-  // console.log(`Length: after join`);
-  // console.log(rooms);
-  // console.log('Length end');
   ws["room"] = room;
-  
   console.log(rooms);
 
   generalInformation(ws);
@@ -78,8 +75,6 @@ function leave(params, ws) {
 }
 
 function generalInformation(ws) {
-  // console.log('GN');
-  // console.log(rooms);
   let obj;
   if (ws["room"] === undefined){
       obj = {
@@ -93,7 +88,7 @@ function generalInformation(ws) {
       obj = {
           "type": "info",
           "params": {
-            "room": "no room",
+            "room": ws.room,
           }
         }
   }
@@ -114,6 +109,14 @@ wss.on('connection', function(ws) {
         } else if (type === "join") {
             console.log('joined');
             join(params, ws);
+        } else if (type === 'write') {
+            console.log('Write start');
+            console.log(params);
+            const ans = { txt: params.txt }
+            txtDB[0].txt = params.txt;
+            console.log(txtDB);
+            console.log('Write ENd');
+            ws.send(JSON.stringify(ans))
         } else {
               console.log('invalid');
               leave(params, ws) // why?

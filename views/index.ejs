@@ -16,7 +16,7 @@
     <br>
     <br>
     <br>
-
+    <h1 id="room-id">RoomId:</h1>
     <button id="create" >Create</button>
     <br>
     <br>
@@ -25,6 +25,10 @@
     <br>
     <br>
     <button id="leave">Leave</button>
+    <br>
+    <br>
+    <input id="txt" type="text">
+    <button id="txt-send">Send txt</button>
 
 </body>
 </html>
@@ -37,6 +41,9 @@
     const createButton = document.getElementById('create');
     const joinButton = document.getElementById('join');
     const leaveButton = document.getElementById('leave');
+    const txtInput = document.getElementById('txt');
+    const sendTxt = document.getElementById('txt-send');
+    const roomId = document.getElementById('room-id');
 
     createButton.addEventListener('click', function (e) {
         server.send('{ "type": "create" }');
@@ -56,7 +63,18 @@
         console.log('leave');
     });
 
-
+    sendTxt.addEventListener('click', function (e) {
+        // console.log(getRoomId(roomId.innerText));
+        // console.log(roomId.innerText.split(':')[1]);
+        const room = getRoomId(roomId.innerText);
+        const obj = { type: "write" , 
+                      params: { 
+                                txt: txtInput.value,
+                                roomId: room
+                              }
+                    };
+        server.send(JSON.stringify(obj));
+    })
 
 
 
@@ -65,6 +83,12 @@
     const message = document.getElementById('messages');
     const input = document.getElementById('message');
     const button = document.getElementById('send');
+
+
+    const getRoomId = function(roomId) {
+        console.log(roomId);
+        return roomId.split(':')[1];
+    } 
 
     button.disabled = true;
     button.addEventListener('click', sendMessage, false);
@@ -75,7 +99,19 @@
 
     server.onmessage = function(event) {
         const { data } = event;
-        console.log(JSON.parse(data));
+        const parsedData = JSON.parse(data);
+
+        
+        if (parsedData.params.room) {
+            console.log('create');
+            console.log(parsedData.params.room);
+            roomId.innerText = `RoomId:${parsedData.params.room}`
+        } else {
+            console.log(parsedData);
+        }
+
+        
+
         // generateMessageEntry(data, 'Server');
 
     }
