@@ -124,7 +124,7 @@ wss.on('connection', function(ws) {
             txtDB[txtDBIndex].txt = inputTxt;
             console.log(`New: ${txtDB[txtDBIndex].txt}`);
 
-            broadcast(txtDB[txtDBIndex].txt, roomId)
+            broadcast(txtDB[txtDBIndex].txt, roomId);
             // ws.send(JSON.stringify({
             //   type: 'info',
             //   params: {
